@@ -27,7 +27,7 @@ import java.io.InputStreamReader
 @Composable
 fun GameScreen(
     modifier: Modifier = Modifier,
-    viewModel: GameViewModel = GameViewModel()
+    viewModel: GameViewModel
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState
@@ -63,16 +63,15 @@ fun GameScreen(
     }
 
     if (mapData.isNotEmpty()) {
-        Box(modifier = modifier){
-            BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-                val tileSizeX = constraints.maxWidth.toFloat() / mapData[0].size
-                val tileSizeY = constraints.maxHeight.toFloat() / mapData.size
-                DrawGameMap(mapData)
-                DrawBall(
-                    x = uiState.ballPositionX * tileSizeX + tileSizeX / 2,
-                    y = uiState.ballPositionY * tileSizeY + tileSizeY / 2
-                )
-            }
+        BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+            val tileSizeX = constraints.maxWidth.toFloat() / mapData[0].size
+            val tileSizeY = constraints.maxHeight.toFloat() / mapData.size
+            DrawGameMap(mapData)
+            DrawBall(
+                x = uiState.ballPositionX * tileSizeX + tileSizeX / 2,
+                y = uiState.ballPositionY * tileSizeY + tileSizeY / 2,
+                color = uiState.ballColor
+            )
         }
     }
 }
@@ -103,14 +102,12 @@ fun DrawGameMap(mapData: List<List<Int>>) {
 }
 
 @Composable
-fun DrawBall(x: Float, y: Float) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = Color.Red,
-                radius = 16.dp.toPx(),
-                center = Offset(x = x, y = y)
-            )
-        }
+fun DrawBall(x: Float, y: Float, color: Color = Color.Red) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawCircle(
+            color = color,
+            radius = 16.dp.toPx(),
+            center = Offset(x = x, y = y)
+        )
     }
 }
