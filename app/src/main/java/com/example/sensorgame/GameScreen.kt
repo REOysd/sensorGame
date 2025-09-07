@@ -1,7 +1,9 @@
 package com.example.sensorgame
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,14 +16,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 @Composable
-fun GameScreen(viewModel: GameViewModel = GameViewModel()) {
+fun GameScreen(
+    viewModel: GameViewModel = GameViewModel(),
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
+    val uiState = viewModel.uiState.value
     var mapData by remember { mutableStateOf<List<List<Int>>>(emptyList()) }
 
     LaunchedEffect(Unit) {
@@ -38,10 +46,22 @@ fun GameScreen(viewModel: GameViewModel = GameViewModel()) {
             }
         }
         reader.close()
+
+        viewModel.loadMapData(mapData)
     }
 
     if (mapData.isNotEmpty()) {
-        DrawGameMap(mapData)
+        Box(modifier = modifier){
+            BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+                val tileSizeX = constraints.maxWidth.toFloat() / mapData[0].size
+                val tileSizeY = constraints.maxHeight.toFloat() / mapData.size
+                DrawGameMap(mapData)
+                DrawBall(
+                    x = uiState.ballPositionX * tileSizeX + tileSizeX,
+                    y = uiState.ballPositionY * tileSizeY + tileSizeY
+                )
+            }
+        }
     }
 }
 
@@ -66,6 +86,19 @@ fun DrawGameMap(mapData: List<List<Int>>) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DrawBall(x: Float, y: Float) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                color = Color.Red,
+                radius = 16.dp.toPx(),
+                center = Offset(x = x, y = y)
+            )
         }
     }
 }
