@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -25,12 +26,23 @@ import java.io.InputStreamReader
 
 @Composable
 fun GameScreen(
-    viewModel: GameViewModel = GameViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: GameViewModel = GameViewModel()
 ) {
     val context = LocalContext.current
-    val uiState = viewModel.uiState.value
+    val uiState by viewModel.uiState
     var mapData by remember { mutableStateOf<List<List<Int>>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        viewModel.initializeSensors(context)
+        viewModel.startSensorListening()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopSensorListening()
+        }
+    }
 
     LaunchedEffect(Unit) {
         val inputStream = context.assets.open("stage1.txt")
@@ -57,8 +69,8 @@ fun GameScreen(
                 val tileSizeY = constraints.maxHeight.toFloat() / mapData.size
                 DrawGameMap(mapData)
                 DrawBall(
-                    x = uiState.ballPositionX * tileSizeX + tileSizeX,
-                    y = uiState.ballPositionY * tileSizeY + tileSizeY
+                    x = uiState.ballPositionX * tileSizeX + tileSizeX / 2,
+                    y = uiState.ballPositionY * tileSizeY + tileSizeY / 2
                 )
             }
         }

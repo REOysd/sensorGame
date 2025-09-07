@@ -20,7 +20,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             SensorGameTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GameScreen()
+                    GameScreen(
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
